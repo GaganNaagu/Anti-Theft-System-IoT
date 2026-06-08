@@ -38,14 +38,6 @@ void GPIO_Init()
   pinMode(DEV_DC_PIN, OUTPUT);
   pinMode(DEV_BL_PIN, OUTPUT);
   analogWrite(DEV_BL_PIN,140);
-
-  pinMode(DEV_VIB_PIN, INPUT);
-  pinMode(DEV_TILT_PIN, INPUT_PULLUP);
-  pinMode(DEV_LED_PIN, OUTPUT);
-  pinMode(DEV_BUZZ_PIN, OUTPUT);
-
-  DEV_Digital_Write(DEV_LED_PIN, 0);
-  DEV_Digital_Write(DEV_BUZZ_PIN, 0);
 }
  void Config_Init()
  {

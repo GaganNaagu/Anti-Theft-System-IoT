@@ -51,10 +51,6 @@
 #define DEV_DC_PIN  7
 #define DEV_RST_PIN 8
 #define DEV_BL_PIN  9
-#define DEV_VIB_PIN  2
-#define DEV_TILT_PIN 3
-#define DEV_LED_PIN  5
-#define DEV_BUZZ_PIN 6
 
 
 /**

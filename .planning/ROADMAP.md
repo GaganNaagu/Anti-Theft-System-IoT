@@ -24,7 +24,7 @@ This project is structured into two main phases to take the system from a basic 
 **Plans**: 1 plan
 
 Plans:
-- [ ] 01-01: Implement sensor polling, alarm outputs, and timing logic with Serial logging.
+- [x] 01-01: Implement sensor polling, alarm outputs, and timing logic with Serial logging.
 
 ### Phase 2: LCD Integration and State Machine Controller
 **Goal**: Configure the Waveshare 1.3" SPI LCD to display the system states and implement state-change rendering logic to prevent display updates from blocking the main loop.

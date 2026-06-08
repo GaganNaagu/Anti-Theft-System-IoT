@@ -3,6 +3,12 @@
 #include "GUI_Paint.h"
 #include "image.h"
 
+// Custom Pin Definitions for Sensors and Alarms (lives entirely in .ino)
+#define VIB_PIN  2
+#define TILT_PIN 3
+#define LED_PIN  5
+#define BUZZ_PIN 6
+
 enum SystemState {
   STATE_SAFE,
   STATE_ALERT
@@ -22,6 +28,14 @@ void setup()
   // Re-initialize Serial to 9600 baud to match the requirements
   Serial.begin(9600);
   Serial.println("System Initializing...");
+
+  // Initialize sensors and alarm outputs
+  pinMode(VIB_PIN, INPUT);
+  pinMode(TILT_PIN, INPUT_PULLUP);
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUZZ_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+  digitalWrite(BUZZ_PIN, LOW);
 
   LCD_Init();
   LCD_Clear(WHITE);
@@ -45,10 +59,10 @@ void setup()
 void loop()
 {
   // 1. Poll the Vibration Sensor
-  int vibrationState = DEV_Digital_Read(DEV_VIB_PIN);
+  int vibrationState = digitalRead(VIB_PIN);
 
   // 2. Poll and Debounce the Tilt Sensor (Active LOW)
-  int rawTilt = DEV_Digital_Read(DEV_TILT_PIN);
+  int rawTilt = digitalRead(TILT_PIN);
   if (rawTilt == LOW) {
     if (tiltActiveStart == 0) {
       tiltActiveStart = millis();
@@ -76,17 +90,17 @@ void loop()
     if (elapsed >= MIN_ALERT_HOLD_TIME && vibrationState == LOW && !isTilted) {
       // Transition back to Safe State
       currentState = STATE_SAFE;
-      DEV_Digital_Write(DEV_LED_PIN, 0);
-      DEV_Digital_Write(DEV_BUZZ_PIN, 0);
+      digitalWrite(LED_PIN, LOW);
+      digitalWrite(BUZZ_PIN, LOW);
       Serial.println("Vehicle Safe");
     } else {
       // Non-blocking pulsed alert (1Hz: 500ms on, 500ms off)
       if ((millis() / 500) % 2 == 0) {
-        DEV_Digital_Write(DEV_LED_PIN, 1);
-        DEV_Digital_Write(DEV_BUZZ_PIN, 1);
+        digitalWrite(LED_PIN, HIGH);
+        digitalWrite(BUZZ_PIN, HIGH);
       } else {
-        DEV_Digital_Write(DEV_LED_PIN, 0);
-        DEV_Digital_Write(DEV_BUZZ_PIN, 0);
+        digitalWrite(LED_PIN, LOW);
+        digitalWrite(BUZZ_PIN, LOW);
       }
     }
   }
