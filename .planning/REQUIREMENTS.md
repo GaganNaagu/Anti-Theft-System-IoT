@@ -39,18 +39,18 @@
 
 | Requirement ID | Mapped Phase | Status |
 |----------------|--------------|--------|
-| HW-01          | —            | Pending|
-| HW-02          | —            | Pending|
-| HW-03          | —            | Pending|
-| HW-04          | —            | Pending|
-| SYS-01         | —            | Pending|
-| SYS-02         | —            | Pending|
-| ALRT-01        | —            | Pending|
-| ALRT-02        | —            | Pending|
-| ALRT-03        | —            | Pending|
-| DISP-01        | —            | Pending|
-| DISP-02        | —            | Pending|
-| LOG-01         | —            | Pending|
+| HW-01          | Phase 1      | Pending|
+| HW-02          | Phase 1      | Pending|
+| HW-03          | Phase 1      | Pending|
+| HW-04          | Phase 1      | Pending|
+| SYS-01         | Phase 2      | Pending|
+| SYS-02         | Phase 1      | Pending|
+| ALRT-01        | Phase 1      | Pending|
+| ALRT-02        | Phase 1      | Pending|
+| ALRT-03        | Phase 1      | Pending|
+| DISP-01        | Phase 2      | Pending|
+| DISP-02        | Phase 2      | Pending|
+| LOG-01         | Phase 1      | Pending|
 
 ---
 *Last updated: 2026-06-08 after requirements definition*
