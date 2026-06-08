@@ -10,16 +10,43 @@
 #define BUZZ_PIN 6
 
 enum SystemState {
+  STATE_SPLASH,
   STATE_SAFE,
   STATE_ALERT
 };
 
-SystemState currentState = STATE_SAFE;
+SystemState currentState = STATE_SPLASH;
+unsigned long splashStartTime = 0;
 unsigned long alertStartTime = 0;
 const unsigned long MIN_ALERT_HOLD_TIME = 5000;
 
 unsigned long tiltActiveStart = 0;
 bool isTilted = false;
+
+// Display Screen Drawing Helpers
+void drawSplashScreen() {
+  Paint_Clear(DARKBLUE);
+  // Center: "VEHICLE SECURE" (14 chars * 17px/char = 238px. X = (240-238)/2 = 1)
+  Paint_DrawString_EN(1, 90, "VEHICLE SECURE", &Font24, DARKBLUE, WHITE);
+  // Center: "System Ready" (12 chars * 11px/char = 132px. X = (240-132)/2 = 54)
+  Paint_DrawString_EN(54, 130, "System Ready", &Font16, DARKBLUE, YELLOW);
+}
+
+void drawSafeScreen() {
+  Paint_Clear(BLACK);
+  // Center: "STATUS: SAFE" (12 chars * 17px/char = 204px. X = (240-204)/2 = 18)
+  Paint_DrawString_EN(18, 100, "STATUS: SAFE", &Font24, BLACK, GREEN);
+  // Center: "Monitoring..." (13 chars * 11px/char = 143px. X = (240-143)/2 = 48)
+  Paint_DrawString_EN(48, 140, "Monitoring...", &Font16, BLACK, LIGHTBLUE);
+}
+
+void drawAlertScreen() {
+  Paint_Clear(RED);
+  // Center: "ALERT!" (6 chars * 17px/char = 102px. X = (240-102)/2 = 69)
+  Paint_DrawString_EN(69, 90, "ALERT!", &Font24, RED, WHITE);
+  // Center: "THEFT ATTEMPT!" (14 chars * 11px/char = 154px. X = (240-154)/2 = 43)
+  Paint_DrawString_EN(43, 130, "THEFT ATTEMPT!", &Font16, RED, YELLOW);
+}
 
 void setup()
 {
@@ -44,20 +71,26 @@ void setup()
   Paint_NewImage(LCD_WIDTH, LCD_HEIGHT, 0, WHITE);
   Paint_Clear(WHITE);
   Paint_SetRotate(180);
-  
-  // Visual test pattern for startup
-  Paint_DrawString_EN(30, 10, "123", &Font24, YELLOW, RED);  
-  Paint_DrawString_EN(30, 34, "ABC", &Font24, BLUE, CYAN);
-  Paint_DrawString_CN(50, 180, "微雪电子", &Font24CN, WHITE, RED);
-  Paint_DrawRectangle(125, 10, 225, 58, RED, DOT_PIXEL_2X2, DRAW_FILL_EMPTY);
-  Paint_DrawCircle(180, 100, 25, BLACK, DOT_PIXEL_2X2, DRAW_FILL_EMPTY);
-  Paint_DrawImage(gImage_70X70, 20, 80, 70, 70); 
+
+  // Draw Splash screen and record startup time
+  drawSplashScreen();
+  splashStartTime = millis();
 
   Serial.println("System Ready");
 }
 
 void loop()
 {
+  // 0. Handle Splash Screen Timer non-blockingly
+  if (currentState == STATE_SPLASH) {
+    if (millis() - splashStartTime >= 2000) {
+      currentState = STATE_SAFE;
+      drawSafeScreen();
+      Serial.println("Vehicle Safe");
+    }
+    return; // Do not poll sensors during splash state
+  }
+
   // 1. Poll the Vibration Sensor
   int vibrationState = digitalRead(VIB_PIN);
 
@@ -81,6 +114,7 @@ void loop()
       // Transition to Alert State
       currentState = STATE_ALERT;
       alertStartTime = millis();
+      drawAlertScreen();
       Serial.println("ALERT: Theft Attempt!");
     }
   } else if (currentState == STATE_ALERT) {
@@ -92,6 +126,7 @@ void loop()
       currentState = STATE_SAFE;
       digitalWrite(LED_PIN, LOW);
       digitalWrite(BUZZ_PIN, LOW);
+      drawSafeScreen();
       Serial.println("Vehicle Safe");
     } else {
       // Non-blocking pulsed alert (1Hz: 500ms on, 500ms off)
