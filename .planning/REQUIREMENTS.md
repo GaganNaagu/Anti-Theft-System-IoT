@@ -11,7 +11,7 @@
 - [x] **HW-04**: Configure digital pin D5 as an OUTPUT pin for the Alert LED.
 
 ### System Initialization & Polling (SYS)
-- [ ] **SYS-01**: Initialize hardware configurations, Serial communication (9600 baud), and SPI LCD on startup, displaying a "System Ready" splash screen for 2 seconds.
+- [x] **SYS-01**: Initialize hardware configurations, Serial communication (9600 baud), and SPI LCD on startup, displaying a "System Ready" splash screen for 2 seconds.
 - [x] **SYS-02**: Implement a non-blocking loop execution to continuously poll the Vibration (D2) and Tilt (D3) inputs.
 
 ### Alarm & Trigger Controls (ALRT)
@@ -20,8 +20,8 @@
 - [x] **ALRT-03**: Turn off Buzzer (D6 -> LOW) and LED (D5 -> LOW) after the alarm holding duration has expired and all sensors are in a quiet state.
 
 ### Display Rendering (DISP)
-- [ ] **DISP-01**: Draw a red-themed alert warning screen showing "ALERT!" and "Movement Detected" exactly once when transitioning from Safe to Alert state.
-- [ ] **DISP-02**: Draw a white/green-themed status screen showing "Vehicle Safe" exactly once when transitioning from Alert/Boot to Safe state.
+- [x] **DISP-01**: Draw a red-themed alert warning screen showing "ALERT!" and "Movement Detected" exactly once when transitioning from Safe to Alert state.
+- [x] **DISP-02**: Draw a white/green-themed status screen showing "Vehicle Safe" exactly once when transitioning from Alert/Boot to Safe state.
 
 ### Diagnostics Logging (LOG)
 - [x] **LOG-01**: Log "ALERT: Theft Attempt!" to the serial interface once per alert event when the alert triggers.
@@ -43,13 +43,13 @@
 | HW-02          | Phase 1      | Complete |
 | HW-03          | Phase 1      | Complete |
 | HW-04          | Phase 1      | Complete |
-| SYS-01         | Phase 2      | Pending|
+| SYS-01         | Phase 2      | Complete |
 | SYS-02         | Phase 1      | Complete |
 | ALRT-01        | Phase 1      | Complete |
 | ALRT-02        | Phase 1      | Complete |
 | ALRT-03        | Phase 1      | Complete |
-| DISP-01        | Phase 2      | Pending|
-| DISP-02        | Phase 2      | Pending|
+| DISP-01        | Phase 2      | Complete |
+| DISP-02        | Phase 2      | Complete |
 | LOG-01         | Phase 1      | Complete |
 
 ---

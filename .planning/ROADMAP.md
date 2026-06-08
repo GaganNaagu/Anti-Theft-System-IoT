@@ -7,7 +7,7 @@ This project is structured into two main phases to take the system from a basic 
 ## Phases
 
 - [x] **Phase 1: Hardware Setup and Sensor Interfacing** - Wire and configure the Vibration and Tilt sensors, active buzzer, and LED, validating inputs and alarm output logic over Serial.
-- [/] **Phase 2: LCD Integration and State Machine Controller** - Integrate the 1.3-inch SPI display, show status transitions, and enforce non-blocking execution to keep sensor polling fast.
+- [x] **Phase 2: LCD Integration and State Machine Controller** - Integrate the 1.3-inch SPI display, show status transitions, and enforce non-blocking execution to keep sensor polling fast.
 
 ## Phase Details
 
@@ -38,14 +38,14 @@ Plans:
 **Plans**: 1 plan
 
 Plans:
-- [ ] 02-01: Integrate LCD initialization, splash screens, and state-change display updates.
+- [x] 02-01: Integrate LCD initialization, splash screens, and state-change display updates.
 
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Hardware Setup | 1/1 | Complete | 2026-06-08 |
-| 2. LCD Integration | 0/1 | In Progress | - |
+| 2. LCD Integration | 1/1 | Complete | 2026-06-08 |
 
 ---
 *Roadmap created: 2026-06-08*
