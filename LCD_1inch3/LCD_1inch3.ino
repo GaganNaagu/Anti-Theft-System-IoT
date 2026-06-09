@@ -65,12 +65,16 @@ void drawSafeScreen() {
   Paint_DrawString_EN(48, 140, "Monitoring...", &Font16, BLACK, LIGHTBLUE);
 }
 
-void drawAlertScreen() {
+void drawAlertScreen(const char* reason = "SYSTEM TEST") {
   Paint_Clear(RED);
   // Center: "ALERT!" (6 chars * 17px/char = 102px. X = (240-102)/2 = 69)
-  Paint_DrawString_EN(69, 90, "ALERT!", &Font24, RED, WHITE);
+  Paint_DrawString_EN(69, 80, "ALERT!", &Font24, RED, WHITE);
   // Center: "THEFT ATTEMPT!" (14 chars * 11px/char = 154px. X = (240-154)/2 = 43)
-  Paint_DrawString_EN(43, 130, "THEFT ATTEMPT!", &Font16, RED, YELLOW);
+  Paint_DrawString_EN(43, 120, "THEFT ATTEMPT!", &Font16, RED, YELLOW);
+  
+  // Center the reason string
+  int x = (240 - (strlen(reason) * 11)) / 2;
+  Paint_DrawString_EN(x, 160, reason, &Font16, RED, WHITE);
 }
 
 // Print diagnostic test menu over Serial
@@ -257,8 +261,20 @@ void loop()
         // Transition to Alert State
         currentState = STATE_ALERT;
         alertStartTime = millis();
-        drawAlertScreen();
-        Serial.println("ALERT: Theft Attempt!");
+        
+        // Determine trigger reason
+        const char* reason;
+        if (vibrationState == HIGH && isTilted) {
+          reason = "VIB & TILT";
+        } else if (vibrationState == HIGH) {
+          reason = "VIBRATION";
+        } else {
+          reason = "TILT DETECTED";
+        }
+        
+        drawAlertScreen(reason);
+        Serial.print("ALERT: Theft Attempt! Trigger: ");
+        Serial.println(reason);
       }
     } else if (currentState == STATE_ALERT) {
       unsigned long elapsed = millis() - alertStartTime;
