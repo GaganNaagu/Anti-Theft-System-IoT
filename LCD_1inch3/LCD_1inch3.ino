@@ -23,6 +23,22 @@ const unsigned long MIN_ALERT_HOLD_TIME = 5000;
 unsigned long tiltActiveStart = 0;
 bool isTilted = false;
 
+// Test Mode Definitions for Hardware Diagnostic
+enum TestMode {
+  MODE_NORMAL,       // Normal integrated state machine
+  MODE_TEST_LED,     // Test only the LED (pulsing at 1Hz)
+  MODE_TEST_BUZZ,    // Test only the Buzzer (pulsing at 1Hz)
+  MODE_TEST_LCD,     // Test only the LCD screen (cycling screens)
+  MODE_TEST_SENSORS  // Test only the sensor inputs (printing raw status)
+};
+
+TestMode currentTestMode = MODE_NORMAL;
+
+// Test Timing Variables
+unsigned long lastLcdTestChange = 0;
+int lcdTestStep = 0;
+unsigned long lastSensorPrint = 0;
+
 // Display Screen Drawing Helpers
 void drawSplashScreen() {
   Paint_Clear(DARKBLUE);
@@ -46,6 +62,17 @@ void drawAlertScreen() {
   Paint_DrawString_EN(69, 90, "ALERT!", &Font24, RED, WHITE);
   // Center: "THEFT ATTEMPT!" (14 chars * 11px/char = 154px. X = (240-154)/2 = 43)
   Paint_DrawString_EN(43, 130, "THEFT ATTEMPT!", &Font16, RED, YELLOW);
+}
+
+// Print diagnostic test menu over Serial
+void printMenu() {
+  Serial.println("\n===== SYSTEM TEST MENU =====");
+  Serial.println("0 : Normal Mode (Full Integrated Anti-Theft System)");
+  Serial.println("1 : Test LED Only (1Hz pulsing)");
+  Serial.println("2 : Test Buzzer Only (1Hz pulsing)");
+  Serial.println("3 : Test LCD Screen Only (cycles screens every 2s)");
+  Serial.println("4 : Test Sensors Only (prints raw states to Serial)");
+  Serial.println("============================");
 }
 
 void setup()
@@ -77,65 +104,159 @@ void setup()
   splashStartTime = millis();
 
   Serial.println("System Ready");
+  printMenu();
 }
 
 void loop()
 {
-  // 0. Handle Splash Screen Timer non-blockingly
-  if (currentState == STATE_SPLASH) {
-    if (millis() - splashStartTime >= 2000) {
-      currentState = STATE_SAFE;
-      drawSafeScreen();
-      Serial.println("Vehicle Safe");
-    }
-    return; // Do not poll sensors during splash state
-  }
-
-  // 1. Poll the Vibration Sensor
-  int vibrationState = digitalRead(VIB_PIN);
-
-  // 2. Poll and Debounce the Tilt Sensor (Active LOW)
-  int rawTilt = digitalRead(TILT_PIN);
-  if (rawTilt == LOW) {
-    if (tiltActiveStart == 0) {
-      tiltActiveStart = millis();
-    }
-    if (millis() - tiltActiveStart >= 50) {
-      isTilted = true;
-    }
-  } else {
-    tiltActiveStart = 0;
-    isTilted = false;
-  }
-
-  // 3. State Machine Transition Logic
-  if (currentState == STATE_SAFE) {
-    if (vibrationState == HIGH || isTilted) {
-      // Transition to Alert State
-      currentState = STATE_ALERT;
-      alertStartTime = millis();
-      drawAlertScreen();
-      Serial.println("ALERT: Theft Attempt!");
-    }
-  } else if (currentState == STATE_ALERT) {
-    unsigned long elapsed = millis() - alertStartTime;
+  // Check for incoming serial commands to change modes
+  if (Serial.available() > 0) {
+    char cmd = Serial.read();
     
-    // Check if the alarm duration has expired and conditions are safe
-    if (elapsed >= MIN_ALERT_HOLD_TIME && vibrationState == LOW && !isTilted) {
-      // Transition back to Safe State
-      currentState = STATE_SAFE;
-      digitalWrite(LED_PIN, LOW);
-      digitalWrite(BUZZ_PIN, LOW);
-      drawSafeScreen();
-      Serial.println("Vehicle Safe");
+    // Clear outputs before switching modes
+    digitalWrite(LED_PIN, LOW);
+    digitalWrite(BUZZ_PIN, LOW);
+    
+    switch(cmd) {
+      case '0':
+        currentTestMode = MODE_NORMAL;
+        currentState = STATE_SPLASH;
+        splashStartTime = millis();
+        drawSplashScreen();
+        Serial.println("\n[MODE] Normal Mode selected (starting splash).");
+        printMenu();
+        break;
+      case '1':
+        currentTestMode = MODE_TEST_LED;
+        Serial.println("\n[MODE] LED Test Mode (Buzzer & LCD idle).");
+        break;
+      case '2':
+        currentTestMode = MODE_TEST_BUZZ;
+        Serial.println("\n[MODE] Buzzer Test Mode (LED & LCD idle).");
+        break;
+      case '3':
+        currentTestMode = MODE_TEST_LCD;
+        lcdTestStep = 0;
+        lastLcdTestChange = millis();
+        drawSplashScreen();
+        Serial.println("\n[MODE] LCD Test Mode (LED & Buzzer idle).");
+        break;
+      case '4':
+        currentTestMode = MODE_TEST_SENSORS;
+        lastSensorPrint = millis();
+        Serial.println("\n[MODE] Sensor Reading Test Mode (Alarms disabled).");
+        break;
+      default:
+        // Ignore newline or other characters
+        break;
+    }
+  }
+
+  // Execute behavior based on current mode
+  if (currentTestMode == MODE_TEST_LED) {
+    // Pulse LED at 1Hz (500ms on, 500ms off)
+    if ((millis() / 500) % 2 == 0) {
+      digitalWrite(LED_PIN, HIGH);
     } else {
-      // Non-blocking pulsed alert (1Hz: 500ms on, 500ms off)
-      if ((millis() / 500) % 2 == 0) {
-        digitalWrite(LED_PIN, HIGH);
-        digitalWrite(BUZZ_PIN, HIGH);
+      digitalWrite(LED_PIN, LOW);
+    }
+  } 
+  else if (currentTestMode == MODE_TEST_BUZZ) {
+    // Pulse Buzzer at 1Hz (500ms on, 500ms off)
+    if ((millis() / 500) % 2 == 0) {
+      digitalWrite(BUZZ_PIN, HIGH);
+    } else {
+      digitalWrite(BUZZ_PIN, LOW);
+    }
+  } 
+  else if (currentTestMode == MODE_TEST_LCD) {
+    // Cycle screens every 2000ms
+    if (millis() - lastLcdTestChange >= 2000) {
+      lastLcdTestChange = millis();
+      lcdTestStep = (lcdTestStep + 1) % 3;
+      if (lcdTestStep == 0) {
+        drawSplashScreen();
+        Serial.println("  [LCD Test] Showing Splash Screen");
+      } else if (lcdTestStep == 1) {
+        drawSafeScreen();
+        Serial.println("  [LCD Test] Showing Safe Screen");
       } else {
+        drawAlertScreen();
+        Serial.println("  [LCD Test] Showing Alert Screen");
+      }
+    }
+  } 
+  else if (currentTestMode == MODE_TEST_SENSORS) {
+    // Print Raw readings every 500ms
+    if (millis() - lastSensorPrint >= 500) {
+      lastSensorPrint = millis();
+      int vibVal = digitalRead(VIB_PIN);
+      int tiltVal = digitalRead(TILT_PIN);
+      Serial.print("  [Sensors] Vib: ");
+      Serial.print(vibVal == HIGH ? "VIBRATING (HIGH)" : "Idle (LOW)");
+      Serial.print(" | Tilt: ");
+      Serial.println(tiltVal == LOW ? "TILTED (LOW)" : "Upright (HIGH)");
+    }
+  } 
+  else {
+    // MODE_NORMAL: Runs the full integrated anti-theft system
+    
+    // 0. Handle Splash Screen Timer non-blockingly
+    if (currentState == STATE_SPLASH) {
+      if (millis() - splashStartTime >= 2000) {
+        currentState = STATE_SAFE;
+        drawSafeScreen();
+        Serial.println("Vehicle Safe");
+      }
+      return; // Do not poll sensors during splash state
+    }
+
+    // 1. Poll the Vibration Sensor
+    int vibrationState = digitalRead(VIB_PIN);
+
+    // 2. Poll and Debounce the Tilt Sensor (Active LOW)
+    int rawTilt = digitalRead(TILT_PIN);
+    if (rawTilt == LOW) {
+      if (tiltActiveStart == 0) {
+        tiltActiveStart = millis();
+      }
+      if (millis() - tiltActiveStart >= 50) {
+        isTilted = true;
+      }
+    } else {
+      tiltActiveStart = 0;
+      isTilted = false;
+    }
+
+    // 3. State Machine Transition Logic
+    if (currentState == STATE_SAFE) {
+      if (vibrationState == HIGH || isTilted) {
+        // Transition to Alert State
+        currentState = STATE_ALERT;
+        alertStartTime = millis();
+        drawAlertScreen();
+        Serial.println("ALERT: Theft Attempt!");
+      }
+    } else if (currentState == STATE_ALERT) {
+      unsigned long elapsed = millis() - alertStartTime;
+      
+      // Check if the alarm duration has expired and conditions are safe
+      if (elapsed >= MIN_ALERT_HOLD_TIME && vibrationState == LOW && !isTilted) {
+        // Transition back to Safe State
+        currentState = STATE_SAFE;
         digitalWrite(LED_PIN, LOW);
         digitalWrite(BUZZ_PIN, LOW);
+        drawSafeScreen();
+        Serial.println("Vehicle Safe");
+      } else {
+        // Non-blocking pulsed alert (1Hz: 500ms on, 500ms off)
+        if ((millis() / 500) % 2 == 0) {
+          digitalWrite(LED_PIN, HIGH);
+          digitalWrite(BUZZ_PIN, HIGH);
+        } else {
+          digitalWrite(LED_PIN, LOW);
+          digitalWrite(BUZZ_PIN, LOW);
+        }
       }
     }
   }
