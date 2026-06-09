@@ -4,7 +4,7 @@ milestone: v1.0
 milestone_name: milestone
 status: complete
 stopped_at: Completed Milestone v1.0
-last_updated: "2026-06-09T12:33:00.000Z"
+last_updated: "2026-06-09T12:45:00.000Z"
 last_activity: 2026-06-09
 progress:
   total_phases: 2
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-06-08)
 Phase: 2 of 2 (LCD Integration and State Machine Controller)
 Plan: 1 of 1 in current phase
 Status: Complete
-Last activity: 2026-06-09 - Completed quick task 260609-p2n: fix tilt sensor trigger logic
+Last activity: 2026-06-09 - Completed quick task 260609-pc6: update sensor diagnostic prints to include raw values
 
 Progress: [██████████] 100%
 
@@ -78,6 +78,7 @@ None yet.
 
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
+| 260609-pc6 | update sensor diagnostic prints to include raw values | 2026-06-09 | bdf5f61 | [260609-pc6-update-sensor-diagnostic-prints-to-inclu](./quick/260609-pc6-update-sensor-diagnostic-prints-to-inclu/) |
 | 260609-p2n | fix tilt sensor trigger logic | 2026-06-09 | 17c69ff | [260609-p2n-fix-tilt-sensor-trigger-logic](./quick/260609-p2n-fix-tilt-sensor-trigger-logic/) |
 
 ## Deferred Items
