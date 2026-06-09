@@ -45,8 +45,8 @@ void drawStandbyScreen() {
   Paint_Clear(BLACK);
   // Center: "DIAGNOSTIC MODE" (15 chars * 11px/char = 165px. X = (240-165)/2 = 37)
   Paint_DrawString_EN(37, 90, "DIAGNOSTIC MODE", &Font16, BLACK, WHITE);
-  // Center: "Send 0-4 over Serial" (20 chars * 8px/char = 160px. X = (240-160)/2 = 40)
-  Paint_DrawString_EN(40, 130, "Send 0-4 over Serial", &Font12, BLACK, YELLOW);
+  // Center: "Send 0-4 over Serial" (20 chars * 5px/char = 100px. X = (240-100)/2 = 70)
+  Paint_DrawString_EN(70, 130, "Send 0-4 over Serial", &Font8, BLACK, YELLOW);
 }
 
 void drawSplashScreen() {
