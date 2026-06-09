@@ -20,6 +20,9 @@ An Arduino-based smart vehicle monitoring and anti-theft system. The project fea
 
 ## 🔌 Hardware Connections
 
+### 📐 Circuit Diagram
+![Circuit Diagram](nowatermarkcircuits/circuit_image_nogrid.png)
+
 ### 📺 Waveshare 1.3" SPI LCD Screen
 | Pin Name | Arduino Pin | Description |
 | :--- | :--- | :--- |
