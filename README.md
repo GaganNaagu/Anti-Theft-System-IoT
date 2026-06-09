@@ -50,7 +50,7 @@ An Arduino-based smart vehicle monitoring and anti-theft system. The project fea
 ## 🚀 How to Run the Project
 
 1. Connect the hardware according to the pins above.
-2. Open the main sketch `LCD_1inch3/LCD_1inch3.ino` in the **Arduino IDE**.
+2. Open the main sketch `Anti_Theft_System/Anti_Theft_System.ino` in the **Arduino IDE**.
 3. Compile and upload the sketch to your board (e.g., Arduino Uno or Nano).
 4. Open the Arduino **Serial Monitor** and set the baud rate to **9600**.
 5. Select a test mode from the console or press `0` to launch the security monitoring system.
