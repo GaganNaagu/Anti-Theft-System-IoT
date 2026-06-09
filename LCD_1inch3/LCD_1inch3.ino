@@ -214,9 +214,11 @@ void loop()
       int vibVal = digitalRead(VIB_PIN);
       int tiltVal = digitalRead(TILT_PIN);
       Serial.print("  [Sensors] Vib: ");
-      Serial.print(vibVal == HIGH ? "VIBRATING (HIGH)" : "Idle (LOW)");
+      Serial.print(vibVal);
+      Serial.print(vibVal == HIGH ? " (VIBRATING)" : " (Idle)");
       Serial.print(" | Tilt: ");
-      Serial.println(tiltVal == HIGH ? "TILTED (HIGH)" : "Upright (LOW)");
+      Serial.print(tiltVal);
+      Serial.println(tiltVal == HIGH ? " (TILTED)" : " (Upright)");
     }
   } 
   else {
