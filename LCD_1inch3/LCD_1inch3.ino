@@ -25,6 +25,7 @@ bool isTilted = false;
 
 // Test Mode Definitions for Hardware Diagnostic
 enum TestMode {
+  MODE_IDLE,         // Standby on startup, wait for command
   MODE_NORMAL,       // Normal integrated state machine
   MODE_TEST_LED,     // Test only the LED (pulsing at 1Hz)
   MODE_TEST_BUZZ,    // Test only the Buzzer (pulsing at 1Hz)
@@ -32,7 +33,7 @@ enum TestMode {
   MODE_TEST_SENSORS  // Test only the sensor inputs (printing raw status)
 };
 
-TestMode currentTestMode = MODE_NORMAL;
+TestMode currentTestMode = MODE_IDLE;
 
 // Test Timing Variables
 unsigned long lastLcdTestChange = 0;
@@ -40,6 +41,14 @@ int lcdTestStep = 0;
 unsigned long lastSensorPrint = 0;
 
 // Display Screen Drawing Helpers
+void drawStandbyScreen() {
+  Paint_Clear(BLACK);
+  // Center: "DIAGNOSTIC MODE" (15 chars * 11px/char = 165px. X = (240-165)/2 = 37)
+  Paint_DrawString_EN(37, 90, "DIAGNOSTIC MODE", &Font16, BLACK, WHITE);
+  // Center: "Send 0-4 over Serial" (20 chars * 8px/char = 160px. X = (240-160)/2 = 40)
+  Paint_DrawString_EN(40, 130, "Send 0-4 over Serial", &Font12, BLACK, YELLOW);
+}
+
 void drawSplashScreen() {
   Paint_Clear(DARKBLUE);
   // Center: "VEHICLE SECURE" (14 chars * 17px/char = 238px. X = (240-238)/2 = 1)
@@ -72,6 +81,7 @@ void printMenu() {
   Serial.println("2 : Test Buzzer Only (1Hz pulsing)");
   Serial.println("3 : Test LCD Screen Only (cycles screens every 2s)");
   Serial.println("4 : Test Sensors Only (prints raw states to Serial)");
+  Serial.println("5 : Return to Standby Menu");
   Serial.println("============================");
 }
 
@@ -99,11 +109,10 @@ void setup()
   Paint_Clear(WHITE);
   Paint_SetRotate(180);
 
-  // Draw Splash screen and record startup time
-  drawSplashScreen();
-  splashStartTime = millis();
+  // Draw Standby screen on boot and display menu
+  drawStandbyScreen();
 
-  Serial.println("System Ready");
+  Serial.println("System Ready in Standby. Select mode from Serial Monitor.");
   printMenu();
 }
 
@@ -146,6 +155,13 @@ void loop()
         lastSensorPrint = millis();
         Serial.println("\n[MODE] Sensor Reading Test Mode (Alarms disabled).");
         break;
+      case '5':
+      case 'm':
+        currentTestMode = MODE_IDLE;
+        drawStandbyScreen();
+        Serial.println("\n[MODE] Standby Menu. Select test mode.");
+        printMenu();
+        break;
       default:
         // Ignore newline or other characters
         break;
@@ -153,7 +169,12 @@ void loop()
   }
 
   // Execute behavior based on current mode
-  if (currentTestMode == MODE_TEST_LED) {
+  if (currentTestMode == MODE_IDLE) {
+    // Standby: keep outputs LOW
+    digitalWrite(LED_PIN, LOW);
+    digitalWrite(BUZZ_PIN, LOW);
+  }
+  else if (currentTestMode == MODE_TEST_LED) {
     // Pulse LED at 1Hz (500ms on, 500ms off)
     if ((millis() / 500) % 2 == 0) {
       digitalWrite(LED_PIN, HIGH);
