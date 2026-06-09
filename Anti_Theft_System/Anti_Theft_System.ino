@@ -18,7 +18,10 @@ SystemState currentState = STATE_SPLASH;
 unsigned long splashStartTime = 0;
 unsigned long alertStartTime = 0;
 const unsigned long MIN_ALERT_HOLD_TIME = 5000;
+const unsigned long SENSOR_HOLD_TIME = 2000;
 
+unsigned long lastVibTriggerTime = 0;
+unsigned long lastTiltTriggerTime = 0;
 unsigned long tiltActiveStart = 0;
 bool isTilted = false;
 
@@ -32,7 +35,7 @@ enum TestMode {
   MODE_TEST_SENSORS  // Test only the sensor inputs (printing raw status)
 };
 
-TestMode currentTestMode = MODE_IDLE;
+TestMode currentTestMode = MODE_NORMAL;
 
 // Test Timing Variables
 unsigned long lastLcdTestChange = 0;
@@ -237,35 +240,39 @@ void loop()
       return; // Do not poll sensors during splash state
     }
 
-    // 1. Poll the Vibration Sensor
-    int vibrationState = digitalRead(VIB_PIN);
+    // 1. Poll the Vibration Sensor with hold time
+    int rawVib = digitalRead(VIB_PIN);
+    if (rawVib == HIGH) {
+      lastVibTriggerTime = millis();
+    }
+    bool isVibrating = (lastVibTriggerTime > 0 && (millis() - lastVibTriggerTime < SENSOR_HOLD_TIME));
 
-    // 2. Poll and Debounce the Tilt Sensor (Active HIGH - open circuit when tilted)
+    // 2. Poll and Debounce the Tilt Sensor with hold time (Active HIGH - open circuit when tilted)
     int rawTilt = digitalRead(TILT_PIN);
     if (rawTilt == HIGH) {
       if (tiltActiveStart == 0) {
         tiltActiveStart = millis();
       }
       if (millis() - tiltActiveStart >= 50) {
-        isTilted = true;
+        lastTiltTriggerTime = millis();
       }
     } else {
       tiltActiveStart = 0;
-      isTilted = false;
     }
+    isTilted = (lastTiltTriggerTime > 0 && (millis() - lastTiltTriggerTime < SENSOR_HOLD_TIME));
 
     // 3. State Machine Transition Logic
     if (currentState == STATE_SAFE) {
-      if (vibrationState == HIGH || isTilted) {
+      if (isVibrating || isTilted) {
         // Transition to Alert State
         currentState = STATE_ALERT;
         alertStartTime = millis();
         
         // Determine trigger reason
         const char* reason;
-        if (vibrationState == HIGH && isTilted) {
+        if (isVibrating && isTilted) {
           reason = "VIB & TILT";
-        } else if (vibrationState == HIGH) {
+        } else if (isVibrating) {
           reason = "VIBRATION";
         } else {
           reason = "TILT DETECTED";
@@ -279,7 +286,7 @@ void loop()
       unsigned long elapsed = millis() - alertStartTime;
       
       // Check if the alarm duration has expired and conditions are safe
-      if (elapsed >= MIN_ALERT_HOLD_TIME && vibrationState == LOW && !isTilted) {
+      if (elapsed >= MIN_ALERT_HOLD_TIME && !isVibrating && !isTilted) {
         // Transition back to Safe State
         currentState = STATE_SAFE;
         digitalWrite(LED_PIN, LOW);
