@@ -216,7 +216,7 @@ void loop()
       Serial.print("  [Sensors] Vib: ");
       Serial.print(vibVal == HIGH ? "VIBRATING (HIGH)" : "Idle (LOW)");
       Serial.print(" | Tilt: ");
-      Serial.println(tiltVal == LOW ? "TILTED (LOW)" : "Upright (HIGH)");
+      Serial.println(tiltVal == HIGH ? "TILTED (HIGH)" : "Upright (LOW)");
     }
   } 
   else {
@@ -235,9 +235,9 @@ void loop()
     // 1. Poll the Vibration Sensor
     int vibrationState = digitalRead(VIB_PIN);
 
-    // 2. Poll and Debounce the Tilt Sensor (Active LOW)
+    // 2. Poll and Debounce the Tilt Sensor (Active HIGH - open circuit when tilted)
     int rawTilt = digitalRead(TILT_PIN);
-    if (rawTilt == LOW) {
+    if (rawTilt == HIGH) {
       if (tiltActiveStart == 0) {
         tiltActiveStart = millis();
       }
