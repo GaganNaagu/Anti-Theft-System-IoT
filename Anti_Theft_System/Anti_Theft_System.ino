@@ -1,7 +1,6 @@
 #include <SPI.h>
 #include "LCD_Driver.h"
 #include "GUI_Paint.h"
-#include "image.h"
 
 // Custom Pin Definitions for Sensors and Alarms (lives entirely in .ino)
 #define VIB_PIN  2

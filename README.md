@@ -21,7 +21,7 @@ An Arduino-based smart vehicle monitoring and anti-theft system. The project fea
 ## 🔌 Hardware Connections
 
 ### 📐 Circuit Diagram
-![Circuit Diagram](nowatermarkcircuits/circuit_image_nogrid.png)
+![Circuit Diagram](circuit_diagram.png)
 
 ### 📺 Waveshare 1.3" SPI LCD Screen
 | Pin Name | Arduino Pin | Description |
@@ -44,6 +44,20 @@ An Arduino-based smart vehicle monitoring and anti-theft system. The project fea
 | **Buzzer** | **D6** | Digital Output. Pulses at 1Hz on alarm. |
 
 *Note: Custom pins were carefully selected to avoid conflicts with the SPI bus pins used by the LCD display.*
+
+---
+
+## 📂 Repository File Structure
+
+* **`Anti_Theft_System/`**:
+  * **`Anti_Theft_System.ino`**: The main Arduino sketch containing the state machine, interactive serial diagnostic menu, sensor polling, and display drawing logic.
+  * **`LCD_Driver.h` / `.cpp`**: The hardware-level driver for the Waveshare 1.3" SPI LCD (ST7789 controller).
+  * **`GUI_Paint.h` / `.cpp`**: Image drawing library for rendering graphics, text, and geometric shapes on the display.
+  * **`DEV_Config.h` / `.cpp`**: Pin definitions, SPI interface configurations, and delay/time wrappers.
+  * **`fonts.h` / `font8.cpp` / `font16.cpp` / `font24.cpp`**: Font libraries used to draw text on the LCD.
+  * **`Debug.h`**: Debug print macro configuration.
+  * **`Smart Vehicle Monitoring and Anti Theft System.pdf`**: Original project design reference document.
+* **`circuit_diagram.png`**: The schematic diagram showing the pin connections between Arduino, LCD screen, and sensors/alarms.
 
 ---
 
